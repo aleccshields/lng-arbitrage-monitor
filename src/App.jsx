@@ -31,6 +31,7 @@ export default function App() {
     spread: null,
     chartData: [],
     spreadData: [],
+    fetchedAt: null,
     loading: true,
     error: null,
   })
@@ -69,6 +70,7 @@ export default function App() {
           spread: latestHH != null && latestTTF != null ? +(latestTTF - latestHH).toFixed(2) : null,
           chartData,
           spreadData,
+          fetchedAt: new Date().toLocaleString(),
           loading: false,
           error: null,
         })
@@ -79,7 +81,7 @@ export default function App() {
     load()
   }, [])
 
-  const { latestHH, latestTTF, spread, chartData, spreadData, loading, error } = state
+  const { latestHH, latestTTF, spread, chartData, spreadData, fetchedAt, loading, error } = state
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px 64px' }}>
@@ -144,6 +146,12 @@ export default function App() {
           {/* ── EIA Export Data ── */}
           <div style={{ marginTop: 32 }}>
             <EIASection />
+          </div>
+
+          {/* ── Footer ── */}
+          <div style={{ marginTop: 32, fontSize: 11, color: '#555', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <span>Sources: Yahoo Finance (NG=F, TTF=F)</span>
+            {fetchedAt && <span>· Data as of: {fetchedAt}</span>}
           </div>
         </>
       )}
