@@ -45,22 +45,22 @@ export default function SpreadChart({ data, currentSpread }) {
       {/* Stats row */}
       <div style={{ display: 'flex', gap: 40, marginBottom: 20, flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 2, color: '#555', textTransform: 'uppercase', marginBottom: 6 }}>
+          <div style={{ fontSize: 10, letterSpacing: 2, color: '#aaa', textTransform: 'uppercase', marginBottom: 6 }}>
             6-Month Avg Spread
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: avg >= 0 ? '#22c55e' : '#ef4444', fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#ffffff', fontVariantNumeric: 'tabular-nums' }}>
             {avg >= 0 ? '+' : ''}${avg.toFixed(2)}
           </div>
-          <div style={{ fontSize: 11, color: '#444', marginTop: 2 }}>/MMBtu</div>
+          <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>/MMBtu</div>
         </div>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 2, color: '#555', textTransform: 'uppercase', marginBottom: 6 }}>
+          <div style={{ fontSize: 10, letterSpacing: 2, color: '#aaa', textTransform: 'uppercase', marginBottom: 6 }}>
             Current
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: currentSpread == null ? '#555' : currentSpread >= 0 ? '#22c55e' : '#ef4444', fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#ffffff', fontVariantNumeric: 'tabular-nums' }}>
             {currentSpread == null ? '—' : `${currentSpread >= 0 ? '+' : ''}$${currentSpread.toFixed(2)}`}
           </div>
-          <div style={{ fontSize: 11, color: '#444', marginTop: 2 }}>/MMBtu</div>
+          <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>/MMBtu</div>
         </div>
       </div>
 
@@ -76,12 +76,12 @@ export default function SpreadChart({ data, currentSpread }) {
           <XAxis
             dataKey="date"
             ticks={ticks}
-            tick={{ fill: '#555', fontSize: 10, fontFamily: 'Courier New, monospace' }}
+            tick={{ fill: '#888', fontSize: 10, fontFamily: 'Courier New, monospace' }}
             axisLine={{ stroke: '#2a2a2a' }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#555', fontSize: 10, fontFamily: 'Courier New, monospace' }}
+            tick={{ fill: '#888', fontSize: 10, fontFamily: 'Courier New, monospace' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${v}`}

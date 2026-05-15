@@ -53,12 +53,12 @@ export default function PriceChart({ data }) {
           <XAxis
             dataKey="date"
             ticks={ticks}
-            tick={{ fill: '#555', fontSize: 10, fontFamily: 'Courier New, monospace' }}
+            tick={{ fill: '#888', fontSize: 10, fontFamily: 'Courier New, monospace' }}
             axisLine={{ stroke: '#2a2a2a' }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: '#555', fontSize: 10, fontFamily: 'Courier New, monospace' }}
+            tick={{ fill: '#888', fontSize: 10, fontFamily: 'Courier New, monospace' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${v}`}
@@ -66,7 +66,7 @@ export default function PriceChart({ data }) {
           />
           <Tooltip content={<ChartTooltip />} />
           <Legend
-            wrapperStyle={{ fontSize: 11, color: '#666', paddingTop: 14, fontFamily: 'Courier New, monospace' }}
+            wrapperStyle={{ fontSize: 11, color: '#aaa', paddingTop: 14, fontFamily: 'Courier New, monospace' }}
             formatter={legendFormatter}
           />
           <Line

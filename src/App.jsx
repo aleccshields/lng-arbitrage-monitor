@@ -31,7 +31,6 @@ export default function App() {
     spread: null,
     chartData: [],
     spreadData: [],
-    eiaData: [],
     loading: true,
     error: null,
   })
@@ -39,14 +38,12 @@ export default function App() {
   useEffect(() => {
     async function load() {
       try {
-        const [hhJson, ttfJson, eiaJson] = await Promise.all([
+        const [hhJson, ttfJson] = await Promise.all([
           fetch('/api/hh').then(r => r.json()),
           fetch('/api/ttf').then(r => r.json()),
-          fetch('/api/eia').then(r => r.json()),
         ])
         console.log('HH raw:', hhJson)
         console.log('TTF raw:', ttfJson)
-        console.log('EIA raw:', eiaJson)
 
         const hhData = parseYahooChart(hhJson, p => p)
         const ttfData = parseYahooChart(ttfJson, p => p * TTF_TO_USD_MMBTU)
@@ -66,16 +63,12 @@ export default function App() {
           .filter(d => d.hh != null && d.ttf != null)
           .map(d => ({ date: d.date, spread: +(d.ttf - d.hh).toFixed(2) }))
 
-        // EIA returns desc; reverse to chronological for the sparkline
-        const eiaData = [...(eiaJson?.response?.data ?? [])].reverse()
-
         setState({
           latestHH,
           latestTTF,
           spread: latestHH != null && latestTTF != null ? +(latestTTF - latestHH).toFixed(2) : null,
           chartData,
           spreadData,
-          eiaData,
           loading: false,
           error: null,
         })
@@ -86,7 +79,7 @@ export default function App() {
     load()
   }, [])
 
-  const { latestHH, latestTTF, spread, chartData, spreadData, eiaData, loading, error } = state
+  const { latestHH, latestTTF, spread, chartData, spreadData, loading, error } = state
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px 64px' }}>
@@ -102,7 +95,7 @@ export default function App() {
         }}>
           LNG Arbitrage Monitor
         </h1>
-        <p style={{ color: '#555', marginTop: 8, fontSize: 13, letterSpacing: 1 }}>
+        <p style={{ color: '#888', marginTop: 8, fontSize: 13, letterSpacing: 1 }}>
           TTF–Henry Hub Spread &amp; US Export Utilization
         </p>
       </div>
@@ -134,7 +127,7 @@ export default function App() {
 
           {/* ── Price History Chart ── */}
           <div style={{ marginTop: 36 }}>
-            <div style={{ fontSize: 11, letterSpacing: 2, color: '#555', textTransform: 'uppercase', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: '#aaa', textTransform: 'uppercase', marginBottom: 12 }}>
               6-Month Price History
             </div>
             <PriceChart data={chartData} />
@@ -142,7 +135,7 @@ export default function App() {
 
           {/* ── Spread History Chart ── */}
           <div style={{ marginTop: 32 }}>
-            <div style={{ fontSize: 11, letterSpacing: 2, color: '#555', textTransform: 'uppercase', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: '#aaa', textTransform: 'uppercase', marginBottom: 12 }}>
               TTF–HH Spread History
             </div>
             <SpreadChart data={spreadData} currentSpread={spread} />
@@ -150,7 +143,7 @@ export default function App() {
 
           {/* ── EIA Export Data ── */}
           <div style={{ marginTop: 32 }}>
-            <EIASection data={eiaData} />
+            <EIASection />
           </div>
         </>
       )}

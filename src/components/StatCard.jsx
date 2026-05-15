@@ -14,7 +14,7 @@ export default function StatCard({ label, value, unit, color, signed }) {
       <div style={{
         fontSize: 10,
         letterSpacing: 2,
-        color: '#555',
+        color: '#aaa',
         textTransform: 'uppercase',
         marginBottom: 14,
       }}>
@@ -23,7 +23,7 @@ export default function StatCard({ label, value, unit, color, signed }) {
       <div style={{ fontSize: 38, fontWeight: 700, color, lineHeight: 1, marginBottom: 8, fontVariantNumeric: 'tabular-nums' }}>
         {display}
       </div>
-      <div style={{ fontSize: 11, color: '#444' }}>{unit}</div>
+      <div style={{ fontSize: 11, color: '#888' }}>{unit}</div>
     </div>
   )
 }
