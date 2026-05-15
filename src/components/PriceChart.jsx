@@ -9,11 +9,6 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-function fmtDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
@@ -25,7 +20,7 @@ function ChartTooltip({ active, payload, label }) {
       fontSize: 12,
       fontFamily: 'Courier New, monospace',
     }}>
-      <div style={{ color: '#666', marginBottom: 6, fontSize: 11 }}>{fmtDate(label)}</div>
+      <div style={{ color: '#666', marginBottom: 6, fontSize: 11 }}>{label}</div>
       {payload.map(p => (
         p.value != null && (
           <div key={p.dataKey} style={{ color: p.color, marginBottom: 2 }}>
@@ -58,7 +53,6 @@ export default function PriceChart({ data }) {
           <XAxis
             dataKey="date"
             ticks={ticks}
-            tickFormatter={fmtDate}
             tick={{ fill: '#555', fontSize: 10, fontFamily: 'Courier New, monospace' }}
             axisLine={{ stroke: '#2a2a2a' }}
             tickLine={false}

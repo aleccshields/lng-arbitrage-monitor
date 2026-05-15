@@ -4,37 +4,23 @@ import ArbBanner from './components/ArbBanner'
 import PriceChart from './components/PriceChart'
 import EIASection from './components/EIASection'
 
-// Yahoo Finance blocks direct browser requests with CORS headers.
-// corsproxy.io acts as a pass-through to avoid CORS errors.
-const CORS_PROXY = 'https://corsproxy.io/?'
-const YF_HH = 'https://query1.finance.yahoo.com/v8/finance/chart/NG=F?interval=1d&range=6mo'
-const YF_TTF = 'https://query1.finance.yahoo.com/v8/finance/chart/TTF=F?interval=1d&range=6mo'
-
-const EIA_KEY = import.meta.env.VITE_EIA_API_KEY
-const EIA_URL =
-  `https://api.eia.gov/v2/natural-gas/move/lngexports/data/` +
-  `?api_key=${EIA_KEY}` +
-  `&frequency=weekly` +
-  `&data[]=value` +
-  `&sort[0][column]=period` +
-  `&sort[0][direction]=desc` +
-  `&length=10`
+// Data fetched via Vercel serverless routes (api/*.js) to avoid CORS
+// restrictions and keep the EIA API key server-side only.
 
 // TTF is quoted in EUR/MWh; multiply by 0.29 to convert to USD/MMBtu
 // (1 MWh ≈ 3.412 MMBtu combined with prevailing EUR/USD rate ≈ 0.29 blended factor)
 const TTF_TO_USD_MMBTU = 0.29
 
-function parseYahooChart(json) {
-  const result = json?.chart?.result?.[0]
-  if (!result) return { timestamps: [], prices: [] }
-  return {
-    timestamps: result.timestamp ?? [],
-    prices: result.indicators?.quote?.[0]?.close ?? [],
-  }
-}
-
-function tsToDate(unixSec) {
-  return new Date(unixSec * 1000).toISOString().slice(0, 10)
+function parseYahooChart(json, priceFn) {
+  const result = json.chart.result[0]
+  const timestamps = result.timestamp
+  const closes = result.indicators.quote[0].close
+  return timestamps
+    .map((t, i) => ({
+      date: new Date(t * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
+      price: closes[i] ? Number(priceFn(closes[i]).toFixed(2)) : null,
+    }))
+    .filter(d => d.price !== null)
 }
 
 export default function App() {
@@ -52,26 +38,27 @@ export default function App() {
     async function load() {
       try {
         const [hhJson, ttfJson, eiaJson] = await Promise.all([
-          fetch(CORS_PROXY + encodeURIComponent(YF_HH)).then(r => r.json()),
-          fetch(CORS_PROXY + encodeURIComponent(YF_TTF)).then(r => r.json()),
-          fetch(EIA_URL).then(r => r.json()),
+          fetch('/api/hh').then(r => r.json()),
+          fetch('/api/ttf').then(r => r.json()),
+          fetch('/api/eia').then(r => r.json()),
         ])
+        console.log('HH raw:', hhJson)
+        console.log('TTF raw:', ttfJson)
+        console.log('EIA raw:', eiaJson)
 
-        const { timestamps: hhTs, prices: hhPx } = parseYahooChart(hhJson)
-        const { timestamps: ttfTs, prices: ttfPxRaw } = parseYahooChart(ttfJson)
-        const ttfPx = ttfPxRaw.map(p => (p != null ? +(p * TTF_TO_USD_MMBTU).toFixed(4) : null))
+        const hhData = parseYahooChart(hhJson, p => p)
+        const ttfData = parseYahooChart(ttfJson, p => p * TTF_TO_USD_MMBTU)
 
-        const hhMap = Object.fromEntries(hhTs.map((ts, i) => [tsToDate(ts), hhPx[i]]))
-        const ttfMap = Object.fromEntries(ttfTs.map((ts, i) => [tsToDate(ts), ttfPx[i]]))
-        const dates = [...new Set([...Object.keys(hhMap), ...Object.keys(ttfMap)])].sort()
-        const chartData = dates.map(d => ({
-          date: d,
-          hh: hhMap[d] ?? null,
-          ttf: ttfMap[d] ?? null,
+        // Merge by date string; HH is the primary sequence
+        const ttfByDate = new Map(ttfData.map(d => [d.date, d.price]))
+        const chartData = hhData.map(d => ({
+          date: d.date,
+          hh: d.price,
+          ttf: ttfByDate.get(d.date) ?? null,
         }))
 
-        const latestHH = [...hhPx].reverse().find(p => p != null) ?? null
-        const latestTTF = [...ttfPx].reverse().find(p => p != null) ?? null
+        const latestHH = hhData.length > 0 ? hhData[hhData.length - 1].price : null
+        const latestTTF = ttfData.length > 0 ? ttfData[ttfData.length - 1].price : null
 
         // EIA returns desc; reverse to chronological for the sparkline
         const eiaData = [...(eiaJson?.response?.data ?? [])].reverse()
