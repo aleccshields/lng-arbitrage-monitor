@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import StatCard from './components/StatCard'
 import ArbBanner from './components/ArbBanner'
 import PriceChart from './components/PriceChart'
+import SpreadChart from './components/SpreadChart'
 import EIASection from './components/EIASection'
 
 // Data fetched via Vercel serverless routes (api/*.js) to avoid CORS
@@ -29,6 +30,7 @@ export default function App() {
     latestTTF: null,
     spread: null,
     chartData: [],
+    spreadData: [],
     eiaData: [],
     loading: true,
     error: null,
@@ -60,6 +62,10 @@ export default function App() {
         const latestHH = hhData.length > 0 ? hhData[hhData.length - 1].price : null
         const latestTTF = ttfData.length > 0 ? ttfData[ttfData.length - 1].price : null
 
+        const spreadData = chartData
+          .filter(d => d.hh != null && d.ttf != null)
+          .map(d => ({ date: d.date, spread: +(d.ttf - d.hh).toFixed(2) }))
+
         // EIA returns desc; reverse to chronological for the sparkline
         const eiaData = [...(eiaJson?.response?.data ?? [])].reverse()
 
@@ -68,6 +74,7 @@ export default function App() {
           latestTTF,
           spread: latestHH != null && latestTTF != null ? +(latestTTF - latestHH).toFixed(2) : null,
           chartData,
+          spreadData,
           eiaData,
           loading: false,
           error: null,
@@ -79,7 +86,7 @@ export default function App() {
     load()
   }, [])
 
-  const { latestHH, latestTTF, spread, chartData, eiaData, loading, error } = state
+  const { latestHH, latestTTF, spread, chartData, spreadData, eiaData, loading, error } = state
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '36px 24px 64px' }}>
@@ -131,6 +138,14 @@ export default function App() {
               6-Month Price History
             </div>
             <PriceChart data={chartData} />
+          </div>
+
+          {/* ── Spread History Chart ── */}
+          <div style={{ marginTop: 32 }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: '#555', textTransform: 'uppercase', marginBottom: 12 }}>
+              TTF–HH Spread History
+            </div>
+            <SpreadChart data={spreadData} currentSpread={spread} />
           </div>
 
           {/* ── EIA Export Data ── */}
